@@ -2,6 +2,7 @@
 * This is Paul Zhu's projects on coding challenge by Mitchell International Inc.
 
 ## How to run?
+cd to /src and run the following script
 ### Windows
 * Run `./script/run.bat`
 ### Other
