@@ -1,1 +1,1 @@
-java -cp ".;./build;./libs/*" Main
+java -cp ".;./build;./libs/*" Client

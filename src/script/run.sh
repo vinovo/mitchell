@@ -1,2 +1,2 @@
 #!/bin/bash
-java -cp ".:./build:./libs/*" ./build/Main
+java -cp ".:./build:./libs/*" ./build/Client
