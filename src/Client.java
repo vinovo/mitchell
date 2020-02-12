@@ -10,7 +10,7 @@ public class Client {
 
     public static void main(String[] args) {
         try {
-            Vehicle.add(new Vehicle(1, 2017, "Audi", "A8"));
+            //Vehicle.create(0, 1999, "Diamond", "Jury").writeToDb();
             System.out.println(Vehicle.all());
         } catch (SQLException e) {
             System.out.println("Failed: " + e.getMessage());

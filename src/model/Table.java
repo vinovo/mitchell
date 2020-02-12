@@ -1,5 +1,6 @@
 package model;
 
+import java.sql.SQLException;
 import java.util.Map;
 
 /**
@@ -13,9 +14,15 @@ public interface Table<PK> {
     // Get db schema for creating table
     abstract String getTableSchema();
 
-    // Get primary key of the table
-    abstract PK getTablePrimaryKey();
+    // Get primary key value of the table
+    abstract String getTablePrimaryKey();
+
+    // Get primary key value of the table
+    abstract PK getTablePrimaryKeyValue();
 
     // Get all tuples
     abstract Map<String, Object> getTuples();
+
+    // Add or update the instance in db
+    abstract void writeToDb() throws SQLException;
 }

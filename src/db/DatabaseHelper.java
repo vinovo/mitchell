@@ -50,7 +50,6 @@ import java.util.Map;
      /**
       * @param tableName name of the new table
       * @param schema schema of the new table
-      * @return 0 if no error, errorcode otherwise
       */
     public void createTable(String tableName, String schema) throws SQLException {
         String create = "CREATE TABLE IF NOT EXISTS " + tableName + " (\n" + schema + ");";
@@ -61,59 +60,48 @@ import java.util.Map;
 
      /**
       * @param object object to be inserted
-      * @return 0 if no error
       */
     public void insert(Table object) throws SQLException {
+        StringBuilder insert = new StringBuilder("INSERT INTO " + object.getTableName() + "(");
+
         Map<String, Object> tuples = object.getTuples();
-        ArrayList<String> keys = new ArrayList<>();
-        ArrayList<Object> values = new ArrayList<>();
 
-        for (Map.Entry<String, Object> entry: tuples.entrySet()) {
-            keys.add(entry.getKey());
-            values.add(entry.getValue());
+        for (Map.Entry<String, Object> entry : tuples.entrySet()) {
+            String key = entry.getKey();
+            insert.append(key);
+            insert.append(",");
         }
 
-        if (keys.size() == 0 || keys.size() != values.size()) {
-            throw new SQLException("Failed to insert " + object.getTableName() +
-                    ", size of keys or values is incorrect");
-        }
+        insert.deleteCharAt(insert.length() - 1);
+        insert.append(") VALUES(");
 
-        StringBuilder sb = new StringBuilder("INSERT INTO " + object.getTableName() + "(");
-
-        for (String key : keys) {
-            sb.append(key);
-            sb.append(",");
-        }
-
-        sb.deleteCharAt(sb.length() - 1);
-        sb.append(") VALUES(");
-
-        for (Object value : values) {
+        for (Map.Entry<String, Object> entry : tuples.entrySet()) {
+            Object value = entry.getValue();
             if (value instanceof String) {
-                sb.append("\"").append(value).append("\"");
+                insert.append("\"").append(value).append("\"");
             } else {
-                sb.append(value);
+                insert.append(value);
             }
 
-            sb.append(",");
+            insert.append(",");
         }
 
-        sb.deleteCharAt(sb.length() - 1);
-        sb.append(")");
+        insert.deleteCharAt(insert.length() - 1);
+        insert.append(")");
 
         Statement stmt = Conn.createStatement();
-        stmt.executeUpdate(sb.toString());
+        stmt.executeUpdate(insert.toString());
     }
 
-    public ResultSet select(String tableName, String tuples, String conditions) throws SQLException {
+    public ResultSet select(String tableName, String tuples, String constraints) throws SQLException {
         if (tuples == null) {
             tuples = "*";
         }
 
         String select = "SELECT " + tuples + " FROM " + tableName;
 
-        if (conditions != null) {
-            select += " WHERE " + conditions;
+        if (constraints != null) {
+            select += " WHERE " + constraints;
         }
 
         Statement stmt = Conn.createStatement();
@@ -121,5 +109,37 @@ import java.util.Map;
         return stmt.executeQuery(select);
     }
 
+    public void update(Table object) throws SQLException {
+        StringBuilder update = new StringBuilder("UPDATE " + object.getTableName() + " SET");
 
+        Map<String, Object> tuples = object.getTuples();
+
+        for (Map.Entry<String, Object> entry : tuples.entrySet()) {
+            String key = entry.getKey();
+            Object value = entry.getValue();
+
+            update.append(' ').append(key).append(" = ");
+            if (value instanceof String) {
+                update.append("\"").append(value).append("\"");
+            } else {
+                update.append(value);
+            }
+            update.append(',');
+        }
+
+        update.deleteCharAt(update.length()-1);
+        update.append("\nWHERE ").append(object.getTablePrimaryKey()).append(" = ")
+                .append(object.getTablePrimaryKeyValue());
+
+        Statement stmt = Conn.createStatement();
+        System.out.println(update);
+        stmt.executeUpdate(update.toString());
+    }
+
+    public void delete(String tableName, String constraints) throws SQLException {
+        String delete = "DELETE FROM " + tableName + " WHERE " + constraints;
+
+        Statement stmt = Conn.createStatement();
+        stmt.executeUpdate(delete);
+    }
 }

@@ -18,6 +18,7 @@ public class Vehicle implements Table<Integer> {
     private Integer year;
     private String make;
     private String model;
+    private boolean isNew;
 
     private static final DatabaseHelper DB = DatabaseHelper.getDatabaseHelper();
     private static final String DB_TABLE_NAME = "vehicle";
@@ -29,11 +30,12 @@ public class Vehicle implements Table<Integer> {
 
     private static boolean TABLE_EXISTS = checkTableExistence();
 
-    public Vehicle(int id, Integer year, String make, String model) {
+    private Vehicle(int id, Integer year, String make, String model, boolean isNew) {
         this.id = id;
         this.year = year;
         this.make = make;
         this.model = model;
+        this.isNew = isNew;
     }
 
     private static boolean checkTableExistence() {
@@ -58,7 +60,7 @@ public class Vehicle implements Table<Integer> {
             String make = result.getString("make");
             String model = result.getString("model");
 
-            vehicles.add(new Vehicle(id, year, make, model));
+            vehicles.add(new Vehicle(id, year, make, model, false));
         }
 
         return vehicles;
@@ -81,7 +83,7 @@ public class Vehicle implements Table<Integer> {
             String make = result.getString("make");
             String model = result.getString("model");
 
-            return new Vehicle(id, year, make, model);
+            return new Vehicle(id, year, make, model, false);
         } else {
             return null;
         }
@@ -90,7 +92,6 @@ public class Vehicle implements Table<Integer> {
     /**
      * Delete the instance with id
      * @param id id of the vehicle to delete
-     * @return 0 if success, errorcode otherwise
      */
     public static void deleteById(int id) throws SQLException {
         if (!TABLE_EXISTS) {
@@ -98,25 +99,13 @@ public class Vehicle implements Table<Integer> {
             return;
         }
 
+        DB.delete(DB_TABLE_NAME, "id = " + id);
     }
 
-    /**
-     * @param obj instance of the vehicle to be added
-     * @return 0 if success, errorcode otherwise
-     */
-    public static void add(Vehicle obj) throws SQLException {
-        if (!TABLE_EXISTS) {
-            DB.createTable(DB_TABLE_NAME, DB_SCHEMA);
-            TABLE_EXISTS = true;
-        }
-
-        DB.insert(obj);
-    }
 
     /**
      * update vehicle with the same id in the db
      * @param obj the new instance
-     * @return 0 if success, errorcode otherwise
      */
     public static void update(Vehicle obj) throws SQLException {
         if (!TABLE_EXISTS) {
@@ -124,7 +113,13 @@ public class Vehicle implements Table<Integer> {
             return;
         }
 
+        DB.update(obj);
     }
+
+    public static Vehicle create(int id, Integer year, String make, String model) {
+        return new Vehicle(id, year, make, model, true);
+    }
+
 
     // Getter
     public int getId() {return id;}
@@ -149,7 +144,12 @@ public class Vehicle implements Table<Integer> {
     }
 
     @Override
-    public Integer getTablePrimaryKey() {
+    public String getTablePrimaryKey() {
+        return "id";
+    }
+
+    @Override
+    public Integer getTablePrimaryKeyValue() {
         return id;
     }
 
@@ -164,8 +164,23 @@ public class Vehicle implements Table<Integer> {
         return tuples;
     }
 
+    @Override
+    public void writeToDb() throws SQLException {
+        if (!TABLE_EXISTS) {
+            DB.createTable(DB_TABLE_NAME, DB_SCHEMA);
+            TABLE_EXISTS = true;
+        }
+
+        if (isNew) {
+            DB.insert(this);
+            isNew = false;
+        } else {
+            DB.update(this);
+        }
+    }
+
 
     public String toString() {
-        return getTuples().toString();
+        return "Vehicle " + this.id + ": Year " + this.year + ", Make " + this.make + ", Model " + this.model;
     }
 }
