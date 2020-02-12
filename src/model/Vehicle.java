@@ -18,24 +18,23 @@ public class Vehicle implements Table<Integer> {
     private Integer year;
     private String make;
     private String model;
-    private boolean isNew;
 
     private static final DatabaseHelper DB = DatabaseHelper.getDatabaseHelper();
     private static final String DB_TABLE_NAME = "vehicle";
     private static final String DB_SCHEMA =
             "\tid integer PRIMARY KEY,\n" +
             "\tyear integer,\n" +
-            "\tmake text,\n" +
-            "\tmodel text,\n";
+            "\tmake text NOT NULL,\n" +
+            "\tmodel text NOT NULL,\n" +
+            "\tCHECK (year >= 1950 AND year <= 2050 AND length(make) > 0 AND length(model) > 0";
 
     private static boolean TABLE_EXISTS = checkTableExistence();
 
-    private Vehicle(int id, Integer year, String make, String model, boolean isNew) {
+    private Vehicle(int id, Integer year, String make, String model) {
         this.id = id;
         this.year = year;
         this.make = make;
         this.model = model;
-        this.isNew = isNew;
     }
 
     private static boolean checkTableExistence() {
@@ -52,18 +51,7 @@ public class Vehicle implements Table<Integer> {
         }
 
         ResultSet result = DB.select(DB_TABLE_NAME, "*", null);
-        ArrayList<Vehicle> vehicles = new ArrayList<>();
-
-        while (result.next()) {
-            int id = result.getInt("id");
-            int year = result.getInt("year");
-            String make = result.getString("make");
-            String model = result.getString("model");
-
-            vehicles.add(new Vehicle(id, year, make, model, false));
-        }
-
-        return vehicles;
+        return parseResult(result);
     }
 
     /**
@@ -83,10 +71,35 @@ public class Vehicle implements Table<Integer> {
             String make = result.getString("make");
             String model = result.getString("model");
 
-            return new Vehicle(id, year, make, model, false);
+            return new Vehicle(id, year, make, model);
         } else {
             return null;
         }
+    }
+
+    /**
+     * @param constraints constraints in SQL format
+     * @return List of qualified vehicles
+     * @throws SQLException any SQL exception.
+     */
+    public static List<Vehicle> findByConstraints(String constraints) throws SQLException {
+        ResultSet result = DB.select(DB_TABLE_NAME, "*", constraints);
+        return parseResult(result);
+    }
+
+    private static List<Vehicle> parseResult(ResultSet result) throws SQLException {
+        ArrayList<Vehicle> vehicles = new ArrayList<>();
+
+        while (result.next()) {
+            int id = result.getInt("id");
+            int year = result.getInt("year");
+            String make = result.getString("make");
+            String model = result.getString("model");
+
+            vehicles.add(new Vehicle(id, year, make, model));
+        }
+
+        return vehicles;
     }
 
     /**
@@ -105,21 +118,24 @@ public class Vehicle implements Table<Integer> {
 
     /**
      * update vehicle with the same id in the db
-     * @param obj the new instance
      */
-    public static void update(Vehicle obj) throws SQLException {
+    public static void updateById(int id, Vehicle obj) throws SQLException {
         if (!TABLE_EXISTS) {
             System.err.println("Failed to update, table " + DB_TABLE_NAME + " does not exist");
             return;
         }
 
-        DB.update(obj);
+        DB.update("" + id, obj);
     }
 
     public static Vehicle create(int id, Integer year, String make, String model) {
-        return new Vehicle(id, year, make, model, true);
+        return new Vehicle(id, year, make, model);
     }
 
+    // drop vehicle table from the db
+    public static void deleteAll() throws SQLException {
+        DB.drop(DB_TABLE_NAME);
+    }
 
     // Getter
     public int getId() {return id;}
@@ -149,7 +165,7 @@ public class Vehicle implements Table<Integer> {
     }
 
     @Override
-    public Integer getTablePrimaryKeyValue() {
+    public Integer getPrimaryKeyValue() {
         return id;
     }
 
@@ -171,14 +187,17 @@ public class Vehicle implements Table<Integer> {
             TABLE_EXISTS = true;
         }
 
-        if (isNew) {
+        try {
             DB.insert(this);
-            isNew = false;
-        } else {
-            DB.update(this);
+        } catch (SQLException e) {
+            // if already exists in the db
+            if (e.getErrorCode() == 19) {
+                DB.update("" + getPrimaryKeyValue(), this);
+            } else {
+                throw e;
+            }
         }
     }
-
 
     public String toString() {
         return "Vehicle " + this.id + ": Year " + this.year + ", Make " + this.make + ", Model " + this.model;

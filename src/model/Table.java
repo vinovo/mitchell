@@ -18,7 +18,7 @@ public interface Table<PK> {
     abstract String getTablePrimaryKey();
 
     // Get primary key value of the table
-    abstract PK getTablePrimaryKeyValue();
+    abstract PK getPrimaryKeyValue();
 
     // Get all tuples
     abstract Map<String, Object> getTuples();

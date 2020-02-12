@@ -109,7 +109,7 @@ import java.util.Map;
         return stmt.executeQuery(select);
     }
 
-    public void update(Table object) throws SQLException {
+    public void update(String primaryKeyValue, Table object) throws SQLException {
         StringBuilder update = new StringBuilder("UPDATE " + object.getTableName() + " SET");
 
         Map<String, Object> tuples = object.getTuples();
@@ -129,10 +129,9 @@ import java.util.Map;
 
         update.deleteCharAt(update.length()-1);
         update.append("\nWHERE ").append(object.getTablePrimaryKey()).append(" = ")
-                .append(object.getTablePrimaryKeyValue());
+                .append(primaryKeyValue);
 
         Statement stmt = Conn.createStatement();
-        System.out.println(update);
         stmt.executeUpdate(update.toString());
     }
 
@@ -141,5 +140,12 @@ import java.util.Map;
 
         Statement stmt = Conn.createStatement();
         stmt.executeUpdate(delete);
+    }
+
+    public void drop(String tableName) throws SQLException {
+        String drop = "DROP TABLE IF EXISTS " + tableName + ";";
+
+        Statement stmt = Conn.createStatement();
+        stmt.execute(drop);
     }
 }
