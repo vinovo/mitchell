@@ -5,6 +5,7 @@ package model;
 
 
 import db.DatabaseHelper;
+import helper.Range;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -82,9 +83,75 @@ public class Vehicle implements Table<Integer> {
      * @return List of qualified vehicles
      * @throws SQLException any SQL exception.
      */
-    public static List<Vehicle> findByConstraints(String constraints) throws SQLException {
-        ResultSet result = DB.select(DB_TABLE_NAME, "*", constraints);
+    public static List<Vehicle> findByConstraints(HashMap<String, List<Range>> constraints) throws SQLException {
+        String constraintString = parseConstraintList(constraints);
+
+        System.out.println(constraintString);
+
+        ResultSet result = DB.select(DB_TABLE_NAME, "*", constraintString);
         return parseResult(result);
+    }
+
+    private static String parseConstraintList(HashMap<String, List<Range>> constraints) {
+        if (constraints == null) {
+            return null;
+        }
+
+        StringBuilder sb = new StringBuilder();
+
+        // Parsing constraints for id
+        String key = "id";
+        List<Range> lst = constraints.get(key);
+        if (lst != null && lst.size() > 0) {
+            for (Range range : lst) {
+                sb.append(range.generateConstraintString(key, false)).append(" OR ");
+            }
+
+            sb.delete(sb.length() - 4, sb.length());
+            sb.append(" AND ");
+        }
+
+        // Parsing year constraints
+        key = "year";
+        lst = constraints.get(key);
+        if (lst != null && lst.size() > 0) {
+            for (Range range : lst) {
+                sb.append(range.generateConstraintString(key, false)).append(" OR ");
+            }
+
+            sb.delete(sb.length() - 4, sb.length());
+            sb.append(" AND ");
+        }
+
+        // Parsing make constraints
+        key = "make";
+        lst = constraints.get(key);
+        if (lst != null && lst.size() > 0) {
+            for (Range range : lst) {
+                sb.append(range.generateConstraintString(key, true)).append(" OR ");
+            }
+
+            sb.delete(sb.length() - 4, sb.length());
+            sb.append(" AND ");
+        }
+
+        key = "model";
+        lst = constraints.get(key);
+        if (lst != null && lst.size() > 0) {
+            for (Range range : lst) {
+                sb.append(range.generateConstraintString(key, true)).append(" OR ");
+            }
+
+            sb.delete(sb.length() - 4, sb.length());
+            sb.append(" AND ");
+        }
+
+        // Delete trailing " AND "
+        if (sb.length() > 5) {
+            sb.delete(sb.length() - 5, sb.length());
+        }
+
+        return sb.toString();
     }
 
     private static List<Vehicle> parseResult(ResultSet result) throws SQLException {
