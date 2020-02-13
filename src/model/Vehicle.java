@@ -86,8 +86,6 @@ public class Vehicle implements Table<Integer> {
     public static List<Vehicle> findByConstraints(HashMap<String, List<Range>> constraints) throws SQLException {
         String constraintString = parseConstraintList(constraints);
 
-        System.out.println(constraintString);
-
         ResultSet result = DB.select(DB_TABLE_NAME, "*", constraintString);
         return parseResult(result);
     }

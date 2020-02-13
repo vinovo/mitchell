@@ -16,7 +16,7 @@ public class Range {
             sb.append(key).append(" >= ");
 
             if (isString) {
-                sb.append(Constants.CHAR_DOUBLE_QUOTES).append(lower).append(Constants.CHAR_DOUBLE_QUOTES);
+                sb.append(Constants.DOUBLE_QUOTES_CHR).append(lower).append(Constants.DOUBLE_QUOTES_CHR);
             } else {
                 sb.append(lower);
             }
@@ -30,7 +30,7 @@ public class Range {
             sb.append(key).append(" <= ");
 
             if (isString) {
-                sb.append(Constants.CHAR_DOUBLE_QUOTES).append(upper).append(Constants.CHAR_DOUBLE_QUOTES);
+                sb.append(Constants.DOUBLE_QUOTES_CHR).append(upper).append(Constants.DOUBLE_QUOTES_CHR);
             } else {
                 sb.append(upper);
             }
