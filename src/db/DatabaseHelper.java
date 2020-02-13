@@ -6,19 +6,16 @@
 import model.Table;
 
 import java.sql.*;
-import java.util.ArrayList;
 import java.util.Map;
 
  public class DatabaseHelper {
     private static DatabaseHelper DbDriver = null;
     private static final String url = "jdbc:sqlite:./src/db/vehicles.db";
-
-    private Connection Conn;
+    private Connection ongoingConnection = null;
 
     private DatabaseHelper() {
         try {
             Class.forName("org.sqlite.JDBC");
-            Conn = DriverManager.getConnection(url);
         } catch (Exception e) {
             System.err.println("Failed to connect to database:\n" + e.getMessage());
         }
@@ -37,8 +34,11 @@ import java.util.Map;
 
     public boolean isTableExisted(String tableName) {
         try {
-            DatabaseMetaData dbm = Conn.getMetaData();
+            Connection conn = DriverManager.getConnection(url);
+            DatabaseMetaData dbm = conn.getMetaData();
             ResultSet tables = dbm.getTables(null, null, tableName, null);
+
+            conn.close();
             return tables.next();
         } catch (SQLException e) {
             System.err.println("Failed to check table existence:\n" + e.getMessage());
@@ -52,16 +52,20 @@ import java.util.Map;
       * @param schema schema of the new table
       */
     public void createTable(String tableName, String schema) throws SQLException {
+        Connection conn = DriverManager.getConnection(url);
         String create = "CREATE TABLE IF NOT EXISTS " + tableName + " (\n" + schema + ");";
 
-        Statement stmt = Conn.createStatement();
+        Statement stmt = conn.createStatement();
         stmt.execute(create);
+
+        conn.close();
     }
 
      /**
       * @param object object to be inserted
       */
     public void insert(Table object) throws SQLException {
+        Connection conn = DriverManager.getConnection(url);
         StringBuilder insert = new StringBuilder("INSERT INTO " + object.getTableName() + "(");
 
         Map<String, Object> tuples = object.getTuples();
@@ -89,11 +93,15 @@ import java.util.Map;
         insert.deleteCharAt(insert.length() - 1);
         insert.append(")");
 
-        Statement stmt = Conn.createStatement();
+        Statement stmt = conn.createStatement();
         stmt.executeUpdate(insert.toString());
+
+        conn.close();
     }
 
     public ResultSet select(String tableName, String tuples, String constraints) throws SQLException {
+        Connection conn = DriverManager.getConnection(url);
+
         if (tuples == null) {
             tuples = "*";
         }
@@ -104,12 +112,17 @@ import java.util.Map;
             select += " WHERE " + constraints;
         }
 
-        Statement stmt = Conn.createStatement();
+        Statement stmt = conn.createStatement();
+        ResultSet result = stmt.executeQuery(select);
 
-        return stmt.executeQuery(select);
+        // To be closed later
+        ongoingConnection = conn;
+
+        return result;
     }
 
     public void update(String primaryKeyValue, Table object) throws SQLException {
+        Connection conn = DriverManager.getConnection(url);
         StringBuilder update = new StringBuilder("UPDATE " + object.getTableName() + " SET");
 
         Map<String, Object> tuples = object.getTuples();
@@ -131,21 +144,34 @@ import java.util.Map;
         update.append("\nWHERE ").append(object.getTablePrimaryKey()).append(" = ")
                 .append(primaryKeyValue);
 
-        Statement stmt = Conn.createStatement();
+        Statement stmt = conn.createStatement();
         stmt.executeUpdate(update.toString());
+
+        conn.close();
     }
 
     public void delete(String tableName, String constraints) throws SQLException {
+        Connection conn = DriverManager.getConnection(url);
         String delete = "DELETE FROM " + tableName + " WHERE " + constraints;
 
-        Statement stmt = Conn.createStatement();
+        Statement stmt = conn.createStatement();
         stmt.executeUpdate(delete);
+
+        conn.close();
     }
 
     public void drop(String tableName) throws SQLException {
+        Connection conn = DriverManager.getConnection(url);
         String drop = "DROP TABLE IF EXISTS " + tableName + ";";
 
-        Statement stmt = Conn.createStatement();
-        stmt.execute(drop);
+        Statement stmt = conn.createStatement();
+        stmt.executeUpdate(drop);
+
+        conn.close();
+    }
+
+    public void closeOngoingConnection() throws SQLException {
+        if (ongoingConnection != null)
+            ongoingConnection.close();
     }
 }

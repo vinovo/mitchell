@@ -27,9 +27,9 @@ public class Vehicle implements Table<Integer> {
             "\tyear integer,\n" +
             "\tmake text NOT NULL,\n" +
             "\tmodel text NOT NULL,\n" +
-            "\tCHECK (year >= 1950 AND year <= 2050 AND length(make) > 0 AND length(model) > 0";
+            "\tCHECK (year >= 1950 AND year <= 2050 AND length(make) > 0 AND length(model) > 0)";
 
-    private static boolean TABLE_EXISTS = checkTableExistence();
+    private static boolean TABLE_EXISTS = isTableExist();
 
     private Vehicle(int id, Integer year, String make, String model) {
         this.id = id;
@@ -38,7 +38,7 @@ public class Vehicle implements Table<Integer> {
         this.model = model;
     }
 
-    private static boolean checkTableExistence() {
+    public static boolean isTableExist() {
         return DB.isTableExisted(DB_TABLE_NAME);
     }
 
@@ -46,13 +46,11 @@ public class Vehicle implements Table<Integer> {
      * @return null if error, all Vehicles object in the db otherwise
      */
     public static List<Vehicle> all() throws SQLException {
-        if (!TABLE_EXISTS) {
-            System.err.println("Failed to fetch all, table " + DB_TABLE_NAME + " does not exist");
-            return null;
-        }
-
         ResultSet result = DB.select(DB_TABLE_NAME, "*", null);
-        return parseResult(result);
+        List<Vehicle> ret = parseResult(result);
+        DB.closeOngoingConnection();
+
+        return ret;
     }
 
     /**
@@ -61,7 +59,6 @@ public class Vehicle implements Table<Integer> {
      */
     public static Vehicle findById(int id) throws SQLException {
         if (!TABLE_EXISTS) {
-            System.err.println("Failed to find, table " + DB_TABLE_NAME + " does not exist");
             return null;
         }
 
@@ -87,7 +84,10 @@ public class Vehicle implements Table<Integer> {
         String constraintString = parseConstraintList(constraints);
 
         ResultSet result = DB.select(DB_TABLE_NAME, "*", constraintString);
-        return parseResult(result);
+        List<Vehicle> ret = parseResult(result);
+        DB.closeOngoingConnection();
+
+        return ret;
     }
 
     private static String parseConstraintList(HashMap<String, List<Range>> constraints) {
@@ -148,7 +148,6 @@ public class Vehicle implements Table<Integer> {
         if (sb.length() > 5) {
             sb.delete(sb.length() - 5, sb.length());
         }
-
         return sb.toString();
     }
 
@@ -172,11 +171,6 @@ public class Vehicle implements Table<Integer> {
      * @param id id of the vehicle to delete
      */
     public static void deleteById(int id) throws SQLException {
-        if (!TABLE_EXISTS) {
-            System.err.println("Failed to delete, table " + DB_TABLE_NAME + " does not exist");
-            return;
-        }
-
         DB.delete(DB_TABLE_NAME, "id = " + id);
     }
 
@@ -185,11 +179,6 @@ public class Vehicle implements Table<Integer> {
      * update vehicle with the same id in the db
      */
     public static void updateById(int id, Vehicle obj) throws SQLException {
-        if (!TABLE_EXISTS) {
-            System.err.println("Failed to update, table " + DB_TABLE_NAME + " does not exist");
-            return;
-        }
-
         DB.update("" + id, obj);
     }
 
@@ -200,6 +189,11 @@ public class Vehicle implements Table<Integer> {
     // drop vehicle table from the db
     public static void deleteAll() throws SQLException {
         DB.drop(DB_TABLE_NAME);
+        TABLE_EXISTS = false;
+    }
+
+    public static String[] getFields() {
+        return new String[]{"id", "year", "make", "model"};
     }
 
     // Getter
