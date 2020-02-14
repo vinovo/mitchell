@@ -16,3 +16,7 @@ In the current directory
 In the current directory
 * Run `./script/clean.sh && ./script/compile.sh`
 * Run `./script/test.sh`
+
+## Note
+If permission denied, may need to execute the following commands
+* `chmod 777 ./script/*`
