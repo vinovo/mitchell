@@ -2,9 +2,15 @@
 * This is Paul Zhu's projects on coding challenge by Mitchell International Inc.
 * Precompiled file is put under `build/` for the scripts to be used directly.
 
-## How to run?
-cd to root folder of the project and run the following script
-### Windows
-* Run `./script/run.bat`
-### Other
+## How to run the client?
+In the current directory
+* Run `./script/clean.sh && ./script/compile.sh`
+
+### Linux
 * Run `./script/run.sh`
+
+### Windows
+* Powershell is not supported for this project
+
+## How to run tests?
+* Run `./script/test.sh`
