@@ -169,10 +169,16 @@ public class Client {
             }
 
             int newId = values[0] == null ? Integer.parseInt(arg) : Integer.parseInt(values[0]);
-            Integer year = Integer.parseInt(values[1]);
-            if (year < 1950 || year > 2050) {
-                System.out.println("Value of year has to be in range [1950, 2050].");
-                return CODE_ERROR;
+
+            Integer year;
+            if (values[1] != null) {
+                year = Integer.parseInt(values[1]);
+                if (year < 1950 || year > 2050) {
+                    System.out.println("Value of year has to be in range [1950, 2050].");
+                    return CODE_ERROR;
+                }
+            } else {
+                year = null;
             }
 
             String make = values[2];

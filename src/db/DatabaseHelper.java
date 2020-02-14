@@ -132,7 +132,7 @@ import java.util.Map;
 
         String select = "SELECT " + tuples + " FROM " + tableName;
 
-        if (constraints != null) {
+        if (constraints != null && constraints.length() > 0) {
             select += " WHERE " + constraints;
         }
 
