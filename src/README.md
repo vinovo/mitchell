@@ -13,4 +13,6 @@ In the current directory
 * Powershell is not supported for this project
 
 ## How to run tests?
+In the current directory
+* Run `./script/clean.sh && ./script/compile.sh`
 * Run `./script/test.sh`
