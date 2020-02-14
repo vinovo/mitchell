@@ -14,6 +14,7 @@ public class Constants {
             "Fetch vehicle by custom constraints:\n" + "GET CUSTOM\n" +
             "Update vehicle by id:\n" + "SET [ID]\n" +
             "*Note: if [ID] does not exist, then a new vehicle info will be added to our database.\n" +
+            "Delete vehicle by id:\n" + "DELETE [ID]\n" +
             "To clear all the records: CLEAR\n" +
             "To exit the program: EXIT";
 
