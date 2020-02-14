@@ -62,16 +62,16 @@ class VehicleTest {
 
     @Test
     void findByConstraints() {
-        assertThrows(SQLException.class, () -> Vehicle.findByConstraints(null));
-        assertThrows(SQLException.class, () -> Vehicle.findByConstraints(new HashMap<>()));
+        assertDoesNotThrow(() -> Vehicle.findByConstraints(null));
+        assertDoesNotThrow(() -> Vehicle.findByConstraints(new HashMap<>()));
         HashMap<String, List<Range>> constraints = new HashMap<>();
         constraints.put("id", null);
-        assertThrows(SQLException.class, () -> Vehicle.findByConstraints(constraints));
+        assertDoesNotThrow(() -> Vehicle.findByConstraints(constraints));
         constraints.clear();
         ArrayList<Range> ranges = new ArrayList<>();
         ranges.add(null);
         constraints.put("year", ranges);
-        assertThrows(SQLException.class, () -> Vehicle.findByConstraints(constraints));
+        assertDoesNotThrow(() -> Vehicle.findByConstraints(constraints));
 
         // custom test
         assertDoesNotThrow(() -> {

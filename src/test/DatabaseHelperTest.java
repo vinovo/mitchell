@@ -87,13 +87,13 @@ class DatabaseHelperTest {
 
         assertThrows(SQLException.class, () -> db.select("", "*", null));
 
-        assertThrows(SQLException.class, () -> db.select("foo", "*", ""));
-
         assertThrows(SQLException.class, () -> db.select("foo", "", "model = 1500"));
 
         assertThrows(SQLException.class, () -> db.select("foo", "model", null));
 
         assertDoesNotThrow(() -> {
+            db.select("foo", "*", "");
+
             assertEquals(11000, getRowCount(db.select("foo", null, null)));
 
             for (int i = 0; i < 10000; i++) {
