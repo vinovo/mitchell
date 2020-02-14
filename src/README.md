@@ -1,6 +1,7 @@
 # Mitchell's Coding Challenge
 * This is Paul Zhu's projects on coding challenge by Mitchell International Inc.
-* Precompiled file is put under `build/` for the scripts to be used directly.
+* This program requires at least jdk1.8 to run.
+
 
 ## How to run the client?
 In the current directory
