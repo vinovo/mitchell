@@ -48,7 +48,7 @@ public class Vehicle implements Table<Integer> {
     public static List<Vehicle> all() throws SQLException {
         ResultSet result = DB.select(DB_TABLE_NAME, "*", null);
         List<Vehicle> ret = parseResult(result);
-        DB.closeOngoingConnection();
+        DB.handleConnectionClose();
 
         return ret;
     }
@@ -85,70 +85,58 @@ public class Vehicle implements Table<Integer> {
 
         ResultSet result = DB.select(DB_TABLE_NAME, "*", constraintString);
         List<Vehicle> ret = parseResult(result);
-        DB.closeOngoingConnection();
+        DB.handleConnectionClose();
 
         return ret;
     }
 
     private static String parseConstraintList(HashMap<String, List<Range>> constraints) {
         if (constraints == null) {
-            return null;
+            return "";
         }
 
         StringBuilder sb = new StringBuilder();
 
         // Parsing constraints for id
         String key = "id";
-        List<Range> lst = constraints.get(key);
-        if (lst != null && lst.size() > 0) {
-            for (Range range : lst) {
-                sb.append(range.generateConstraintString(key, false)).append(" OR ");
-            }
 
-            sb.delete(sb.length() - 4, sb.length());
-            sb.append(" AND ");
-        }
+        parseRanges(constraints, sb, key, false);
 
         // Parsing year constraints
         key = "year";
-        lst = constraints.get(key);
-        if (lst != null && lst.size() > 0) {
-            for (Range range : lst) {
-                sb.append(range.generateConstraintString(key, false)).append(" OR ");
-            }
-
-            sb.delete(sb.length() - 4, sb.length());
-            sb.append(" AND ");
-        }
+        parseRanges(constraints, sb, key, false);
 
         // Parsing make constraints
         key = "make";
-        lst = constraints.get(key);
-        if (lst != null && lst.size() > 0) {
-            for (Range range : lst) {
-                sb.append(range.generateConstraintString(key, true)).append(" OR ");
-            }
-
-            sb.delete(sb.length() - 4, sb.length());
-            sb.append(" AND ");
-        }
+        parseRanges(constraints, sb, key, true);
 
         key = "model";
-        lst = constraints.get(key);
-        if (lst != null && lst.size() > 0) {
-            for (Range range : lst) {
-                sb.append(range.generateConstraintString(key, true)).append(" OR ");
-            }
-
-            sb.delete(sb.length() - 4, sb.length());
-            sb.append(" AND ");
-        }
+        parseRanges(constraints, sb, key, true);
 
         // Delete trailing " AND "
         if (sb.length() > 5) {
             sb.delete(sb.length() - 5, sb.length());
         }
+
         return sb.toString();
+    }
+
+    private static void parseRanges(HashMap<String, List<Range>> constraints, StringBuilder sb, String key,
+                                    boolean isString) {
+        List<Range> lst = constraints.get(key);
+        if (lst != null && lst.size() > 0) {
+            int startAt = sb.length();
+            for (Range range : lst) {
+                if (range == null)  continue;
+                sb.append(range.generateConstraintString(key, isString)).append(" OR ");
+            }
+
+            if (sb.length() > 4 && sb.lastIndexOf(" OR ") == sb.length() - 4) {
+                sb.delete(sb.length() - 4, sb.length());
+                sb.insert(startAt, '(');
+                sb.append(") AND ");
+            }
+        }
     }
 
     private static List<Vehicle> parseResult(ResultSet result) throws SQLException {
@@ -170,6 +158,7 @@ public class Vehicle implements Table<Integer> {
      * Delete the instance with id
      * @param id id of the vehicle to delete
      */
+    // Could potentially implement another deleteByConstraint(Map<String, List<Constraint>> constraints)
     public static void deleteById(int id) throws SQLException {
         DB.delete(DB_TABLE_NAME, "id = " + id);
     }

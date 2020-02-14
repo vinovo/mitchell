@@ -15,8 +15,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import static java.lang.System.exit;
-
 
 public class Client {
 
@@ -39,15 +37,10 @@ public class Client {
         try {
             List<Vehicle> vehicles = Vehicle.all();
 
-            // To suppress warning, this will never be executed
-            if (vehicles == null)
-                throw new SQLException();
-
             for (Vehicle vehicle : vehicles) {
                 System.out.println(vehicle);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
             System.out.println(Constants.ERROR_DB_ERR_STRING);
             return false;
         }
@@ -209,7 +202,6 @@ public class Client {
             System.out.println(Constants.ERROR_INVALID_VALUE_STRING);
             return CODE_ERROR;
         } catch (SQLException e) {
-            e.printStackTrace();
             System.out.println(Constants.ERROR_DB_ERR_STRING);
             return CODE_ERROR;
         }
@@ -221,9 +213,7 @@ public class Client {
         try {
             Vehicle.deleteAll();
             System.out.println("All records have been cleared");
-        } catch (SQLException e) {
-            e.printStackTrace();
-            System.out.println("Failed to clear the database, please try again.");
+        } catch (SQLException e) { System.out.println("Failed to clear the database, please try again.");
         }
     }
 
@@ -319,7 +309,7 @@ public class Client {
 
         } catch (IOException e) {
             System.out.println("Oops, we encountered some problem reading your input.");
-            exit(-1);
+            System.exit(-1);
         }
     }
 }

@@ -1,4 +1,4 @@
-/src/db/*.db
+db/*.db
 out/
 .idea/
 *.iml
