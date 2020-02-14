@@ -11,7 +11,7 @@ import java.sql.SQLException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class DatabaseHelperTest {
+class DatabaseHelperTest {
     private DatabaseHelper db;
 
     @BeforeEach
@@ -34,7 +34,7 @@ public class DatabaseHelperTest {
     }
 
     @Test
-    public void isTableExisted() {
+    void isTableExisted() {
         assertTrue(db.isTableExisted("foo"));
         assertFalse(db.isTableExisted("bar"));
         assertFalse(db.isTableExisted(""));
@@ -42,7 +42,7 @@ public class DatabaseHelperTest {
     }
 
     @Test
-    public void createTable() {
+    void createTable() {
         assertThrows(SQLException.class, () -> db.createTable(null, null));
 
         assertThrows(SQLException.class, () -> db.createTable(null, ""));
@@ -60,7 +60,7 @@ public class DatabaseHelperTest {
     }
 
     @Test
-    public void insert() {
+    void insert() {
         assertThrows(SQLException.class, () -> db.insert(new Foo(123)));
 
         assertThrows(SQLException.class, () -> db.insert(Vehicle.create(214, 2020, "foo", "bar")));
@@ -80,7 +80,7 @@ public class DatabaseHelperTest {
     }
 
     @Test
-    public void select() {
+    void select() {
         assertThrows(SQLException.class, () -> db.select("vehicle", "*", null));
 
         assertThrows(SQLException.class, () -> db.select(null, "*", null));
@@ -105,7 +105,7 @@ public class DatabaseHelperTest {
     }
 
     @Test
-    public void update() {
+    void update() {
         assertDoesNotThrow(() -> {
             db.update(null, new Foo(0));
             assertEquals(11000, getRowCount(db.select("foo", null, null)));
@@ -121,7 +121,7 @@ public class DatabaseHelperTest {
     }
 
     @Test
-    public void delete() {
+    void delete() {
         assertDoesNotThrow(() -> {
             db.delete("foo", null);
             db.delete(null, "foo = 1");
@@ -145,7 +145,7 @@ public class DatabaseHelperTest {
     }
 
     @Test
-    public void drop() {
+    void drop() {
         assertDoesNotThrow(() -> {
             db.drop(null);
             db.drop("vehicle");

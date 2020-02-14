@@ -14,11 +14,11 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class VehicleTest {
+class VehicleTest {
     private static DatabaseHelper db;
 
     @BeforeAll
-    public static void init() {
+    static void init() {
         db = DatabaseHelper.getDatabaseHelperInTestMode();
 
         assertDoesNotThrow(() -> {
@@ -29,22 +29,22 @@ public class VehicleTest {
     }
 
     @AfterAll
-    public static void clean() throws SQLException {
+    static void clean() throws SQLException {
         db.closeOngoingConnection();
     }
 
     @Test
-    public void isTableExist() {
+    void isTableExist() {
         assertTrue(Vehicle.isTableExist());
     }
 
     @Test
-    public void all() throws SQLException {
+    void all() throws SQLException {
         assertEquals(101, Vehicle.all().size());
     }
 
     @Test
-    public void findById() {
+    void findById() {
         assertDoesNotThrow(() -> {
             assertNull(Vehicle.findById(-150));
 
@@ -61,7 +61,7 @@ public class VehicleTest {
     }
 
     @Test
-    public void findByConstraints() {
+    void findByConstraints() {
         assertThrows(SQLException.class, () -> Vehicle.findByConstraints(null));
         assertThrows(SQLException.class, () -> Vehicle.findByConstraints(new HashMap<>()));
         HashMap<String, List<Range>> constraints = new HashMap<>();
@@ -154,7 +154,7 @@ public class VehicleTest {
     }
 
     @Test
-    public void deleteById() {
+    void deleteById() {
         assertDoesNotThrow(() -> {
             Vehicle.deleteById(-1);
 
@@ -166,7 +166,7 @@ public class VehicleTest {
     }
 
     @Test
-    public void updateById() {
+    void updateById() {
         assertThrows(SQLException.class, () -> Vehicle.updateById(1, Vehicle.create(0, 1950, "make", "model")));
         assertDoesNotThrow(() -> {
             Vehicle.updateById(-1, Vehicle.create(-1, 1950, "make", "model"));
@@ -183,7 +183,7 @@ public class VehicleTest {
     }
 
     @Test
-    public void writeToDb() {
+    void writeToDb() {
         assertDoesNotThrow(() -> {
             for (int i = 0; i <= 100; i++) {
                 Vehicle.create(i, 1950, "make", "model").writeToDb();
