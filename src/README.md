@@ -1,5 +1,5 @@
 # Mitchell's Coding Challenge
-* This is Paul Zhu's projects on coding challenge by Mitchell International Inc.
+* This is Paul Zhu's project on coding challenge by Mitchell International Inc.
 * This program requires at least jdk1.8 to run.
 
 
