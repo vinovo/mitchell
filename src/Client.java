@@ -66,6 +66,7 @@ public class Client {
 
                 boolean skipLower = (lower == null || lower.length() == 0 || lower.indexOf(' ') >= 0);
                 if (skipLower) {
+                    lower = null;
                     System.out.println("Skipping lower bound for " + field);
                 } else if (lower.toLowerCase().equals("exit"))    return CODE_EXIT;
 
@@ -74,6 +75,7 @@ public class Client {
 
                 boolean skipUpper = (upper == null || upper.length() == 0 || upper.indexOf(' ') >= 0);
                 if (skipUpper) {
+                    upper = null;
                     System.out.println("Skipping upper bound for " + field);
                 } else if (upper.toLowerCase().equals("exit"))  return CODE_EXIT;
 
